@@ -1,42 +1,56 @@
-import { useState, useEffect } from 'react';
-import fetchGraphQL from './fetchGraphQL';
+import { Suspense } from 'react';
+import graphql from 'babel-plugin-relay/macro';
+import { RelayEnvironmentProvider, loadQuery, usePreloadedQuery } from 'react-relay/hooks';
+import RelayEnvironment from './RelayEnvironment';
 import './App.css';
 
+const RepoNameQuery = graphql`query AppRepoNameQuery {
+  repository(name: "todo-app", owner:"sydneytiger"){
+    name
+  }
+}`
 
-function App() {
-  const [name, setName] = useState(null);
+// Immediately load the query as app starts. For a real app, we'd move this
+// into our routing configuration, preloading data as we transition to new routes.
+const preloadedQuery = loadQuery(RelayEnvironment, RepoNameQuery, {/* query variable (empty for RepoNameQuery) */})
 
-  useEffect(() => {
-    let isMounted = true;
-    const query = `query RepoNameQuery {
-      repository(name: "todo-app", owner:"sydneytiger"){
-        name
-      }
-    }`
-
-    fetchGraphQL(query)
-      .then(response => {
-        if(!isMounted) return;
-        setName(response.data.repository.name);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-
-
-    return () => {
-      isMounted = false;
-    }
-  }, [ fetchGraphQL ]);
+// Inner component that reads the preloaded query results via `usePreloadedQuery()`.
+// This works as follows:
+// - If the query has completed, it returns the results of the query.
+// - If the query is still pending, it "suspends" (indicates to React that the
+//   component isn't ready to render yet). This will show the nearest <Suspense>
+//   fallback.
+// - If the query failed, it throws the failure error. For simplicity we aren't
+//   handling the failure case here.
+const App = ({ preloadedQuery }) => {
+  const data = usePreloadedQuery(RepoNameQuery, preloadedQuery)
 
   return (
     <div className="App">
       <header className="App-header">
-        <p>{name ? `Respository: ${name}` : 'Loading' }</p>
+        <p>{`Respository: ${data.repository.name}`}</p>
       </header>
     </div>
   );
-
 }
 
-export default App;
+// Inner component that reads the preloaded query results via `usePreloadedQuery()`.
+// This works as follows:
+// - If the query has completed, it returns the results of the query.
+// - If the query is still pending, it "suspends" (indicates to React that the
+//   component isn't ready to render yet). This will show the nearest <Suspense>
+//   fallback.
+// - If the query failed, it throws the failure error. For simplicity we aren't
+//   handling the failure case here.
+const AppRoot = props => {
+  return(
+    <RelayEnvironmentProvider environment={RelayEnvironment}>
+      <Suspense fallback={'Loading...'}>
+        <App preloadedQuery={preloadedQuery} />
+      </Suspense>
+    </RelayEnvironmentProvider>
+  );
+}
+
+
+export default AppRoot;
