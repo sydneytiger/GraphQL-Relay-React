@@ -8,10 +8,18 @@
 
 /*::
 import type { ConcreteRequest } from 'relay-runtime';
-export type AppRepoNameQueryVariables = {||};
+export type AppRepoNameQueryVariables = {|
+  name: string,
+  owner: string,
+|};
 export type AppRepoNameQueryResponse = {|
   +repository: ?{|
-    +name: string
+    +name: string,
+    +languages: ?{|
+      +nodes: ?$ReadOnlyArray<?{|
+        +name: string
+      |}>
+    |},
   |}
 |};
 export type AppRepoNameQuery = {|
@@ -22,9 +30,18 @@ export type AppRepoNameQuery = {|
 
 
 /*
-query AppRepoNameQuery {
-  repository(name: "todo-app", owner: "sydneytiger") {
+query AppRepoNameQuery(
+  $name: String!
+  $owner: String!
+) {
+  repository(name: $name, owner: $owner) {
     name
+    languages(first: 10) {
+      nodes {
+        name
+        id
+      }
+    }
     id
   }
 }
@@ -33,41 +50,90 @@ query AppRepoNameQuery {
 const node/*: ConcreteRequest*/ = (function(){
 var v0 = [
   {
-    "kind": "Literal",
-    "name": "name",
-    "value": "todo-app"
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "name"
   },
   {
-    "kind": "Literal",
-    "name": "owner",
-    "value": "sydneytiger"
+    "defaultValue": null,
+    "kind": "LocalArgument",
+    "name": "owner"
   }
 ],
-v1 = {
+v1 = [
+  {
+    "kind": "Variable",
+    "name": "name",
+    "variableName": "name"
+  },
+  {
+    "kind": "Variable",
+    "name": "owner",
+    "variableName": "owner"
+  }
+],
+v2 = {
   "alias": null,
   "args": null,
   "kind": "ScalarField",
   "name": "name",
   "storageKey": null
+},
+v3 = [
+  {
+    "kind": "Literal",
+    "name": "first",
+    "value": 10
+  }
+],
+v4 = {
+  "alias": null,
+  "args": null,
+  "kind": "ScalarField",
+  "name": "id",
+  "storageKey": null
 };
 return {
   "fragment": {
-    "argumentDefinitions": [],
+    "argumentDefinitions": (v0/*: any*/),
     "kind": "Fragment",
     "metadata": null,
     "name": "AppRepoNameQuery",
     "selections": [
       {
         "alias": null,
-        "args": (v0/*: any*/),
+        "args": (v1/*: any*/),
         "concreteType": "Repository",
         "kind": "LinkedField",
         "name": "repository",
         "plural": false,
         "selections": [
-          (v1/*: any*/)
+          (v2/*: any*/),
+          {
+            "alias": null,
+            "args": (v3/*: any*/),
+            "concreteType": "LanguageConnection",
+            "kind": "LinkedField",
+            "name": "languages",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "Language",
+                "kind": "LinkedField",
+                "name": "nodes",
+                "plural": true,
+                "selections": [
+                  (v2/*: any*/)
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": "languages(first:10)"
+          }
         ],
-        "storageKey": "repository(name:\"todo-app\",owner:\"sydneytiger\")"
+        "storageKey": null
       }
     ],
     "type": "Query",
@@ -75,42 +141,60 @@ return {
   },
   "kind": "Request",
   "operation": {
-    "argumentDefinitions": [],
+    "argumentDefinitions": (v0/*: any*/),
     "kind": "Operation",
     "name": "AppRepoNameQuery",
     "selections": [
       {
         "alias": null,
-        "args": (v0/*: any*/),
+        "args": (v1/*: any*/),
         "concreteType": "Repository",
         "kind": "LinkedField",
         "name": "repository",
         "plural": false,
         "selections": [
-          (v1/*: any*/),
+          (v2/*: any*/),
           {
             "alias": null,
-            "args": null,
-            "kind": "ScalarField",
-            "name": "id",
-            "storageKey": null
-          }
+            "args": (v3/*: any*/),
+            "concreteType": "LanguageConnection",
+            "kind": "LinkedField",
+            "name": "languages",
+            "plural": false,
+            "selections": [
+              {
+                "alias": null,
+                "args": null,
+                "concreteType": "Language",
+                "kind": "LinkedField",
+                "name": "nodes",
+                "plural": true,
+                "selections": [
+                  (v2/*: any*/),
+                  (v4/*: any*/)
+                ],
+                "storageKey": null
+              }
+            ],
+            "storageKey": "languages(first:10)"
+          },
+          (v4/*: any*/)
         ],
-        "storageKey": "repository(name:\"todo-app\",owner:\"sydneytiger\")"
+        "storageKey": null
       }
     ]
   },
   "params": {
-    "cacheID": "0220562626e30760e2648eada85c13da",
+    "cacheID": "608329cd3e8a9085d2a0318e8dd19dc9",
     "id": null,
     "metadata": {},
     "name": "AppRepoNameQuery",
     "operationKind": "query",
-    "text": "query AppRepoNameQuery {\n  repository(name: \"todo-app\", owner: \"sydneytiger\") {\n    name\n    id\n  }\n}\n"
+    "text": "query AppRepoNameQuery(\n  $name: String!\n  $owner: String!\n) {\n  repository(name: $name, owner: $owner) {\n    name\n    languages(first: 10) {\n      nodes {\n        name\n        id\n      }\n    }\n    id\n  }\n}\n"
   }
 };
 })();
 // prettier-ignore
-(node/*: any*/).hash = 'fb84c4b08d52ef3089ba397d6bfd6bf0';
+(node/*: any*/).hash = 'f086c754b7e9c486f111ba90dd017e37';
 
 module.exports = node;
